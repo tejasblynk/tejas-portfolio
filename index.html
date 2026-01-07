@@ -4,377 +4,459 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tejas Niranjan | System Online</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg-deep: #050505;
+            --bg-deep: #020205;
             --neon-cyan: #00f3ff;
             --neon-purple: #bc13fe;
             --neon-green: #0aff0a;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(0, 243, 255, 0.2);
-            --text-main: #e0e0e0;
+            --neon-alert: #ff2a2a;
+            --glass: rgba(10, 20, 30, 0.7);
+            --border: 1px solid rgba(0, 243, 255, 0.15);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; /* Hide default cursor */ }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
 
         body {
             background-color: var(--bg-deep);
-            color: var(--text-main);
-            font-family: 'JetBrains Mono', monospace;
+            color: #e0e0e0;
+            font-family: 'Rajdhani', sans-serif;
             overflow-x: hidden;
-            height: 100vh;
+            min-height: 100vh;
         }
 
-        /* --- Custom Cursor --- */
-        #cursor {
-            position: fixed; top: 0; left: 0;
-            width: 20px; height: 20px;
-            border: 2px solid var(--neon-cyan);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 9999;
-            transition: width 0.2s, height 0.2s, background 0.2s;
-            mix-blend-mode: difference;
-        }
-        #cursor.hovered {
-            width: 50px; height: 50px;
-            background: rgba(0, 243, 255, 0.2);
-            border-color: var(--neon-purple);
-        }
-
-        /* --- Background Canvas --- */
-        #canvas-bg {
+        /* --- BOOT SCREEN --- */
+        #boot-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
+            background: #000; z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'JetBrains Mono'; color: var(--neon-green);
+        }
+        .boot-text { margin-bottom: 10px; font-size: 14px; opacity: 0; animation: typeLine 0.1s forwards; }
+        @keyframes typeLine { to { opacity: 1; } }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor {
+            position: fixed; top: 0; left: 0; width: 20px; height: 20px;
+            border: 2px solid var(--neon-cyan); border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none; z-index: 9999;
+            mix-blend-mode: difference; transition: width 0.2s, height 0.2s;
+        }
+        #cursor-dot {
+            position: fixed; top: 0; left: 0; width: 4px; height: 4px;
+            background: var(--neon-cyan); border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none; z-index: 9999;
+        }
+        .hovered #cursor { width: 50px; height: 50px; border-color: var(--neon-purple); background: rgba(188, 19, 254, 0.1); }
+
+        /* --- BACKGROUND & SCANLINE --- */
+        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .scanline {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 243, 255, 0.02) 51%);
+            background-size: 100% 4px; pointer-events: none; z-index: 900;
         }
 
-        /* --- Navigation --- */
+        /* --- NAVIGATION --- */
         .navbar {
             position: fixed; top: 0; width: 100%;
-            padding: 20px 40px;
+            background: rgba(2, 2, 5, 0.9); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.3);
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(5, 5, 5, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            z-index: 100;
+            padding: 15px 40px; z-index: 1000;
         }
-        .brand {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px var(--neon-cyan);
+        .brand { font-family: 'Orbitron'; font-size: 1.5rem; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
+        
+        .nav-links { display: flex; gap: 5px; }
+        .nav-btn {
+            background: transparent; border: none; color: #888;
+            font-family: 'Orbitron'; font-size: 0.8rem; letter-spacing: 1px;
+            padding: 8px 16px; position: relative; transition: 0.3s;
         }
-        .nav-links button {
-            background: transparent; border: none;
-            color: var(--text-main);
-            font-family: 'Orbitron'; margin-left: 30px;
-            font-size: 0.9rem; letter-spacing: 2px;
-            position: relative; overflow: hidden;
-        }
-        .nav-links button::before {
-            content: ''; position: absolute; bottom: 0; left: -100%;
-            width: 100%; height: 2px; background: var(--neon-purple);
-            transition: 0.3s;
-        }
-        .nav-links button:hover::before, .nav-links button.active::before { left: 0; }
-        .nav-links button:hover { color: var(--neon-purple); text-shadow: 0 0 8px var(--neon-purple); }
-
-        /* --- Main Layout --- */
-        .container {
-            max-width: 1200px; margin: 100px auto 0; padding: 2rem;
-            min-height: 80vh;
+        .nav-btn:hover, .nav-btn.active { color: var(--neon-cyan); text-shadow: 0 0 8px var(--neon-cyan); }
+        .nav-btn.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
+            background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan);
         }
 
-        /* --- Page Transitions --- */
-        .page {
-            display: none;
-            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        /* --- CONTAINER & TABS --- */
+        .container { max-width: 1300px; margin: 100px auto 50px; padding: 20px; min-height: 80vh; }
+        .page { display: none; animation: slideUp 0.6s cubic-bezier(0.2, 1, 0.3, 1); }
         .page.active { display: block; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- UI COMPONENTS --- */
+        .glass-panel {
+            background: var(--glass); border: var(--border);
+            padding: 2rem; border-radius: 12px; backdrop-filter: blur(12px);
+            position: relative; overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .glass-panel::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--neon-cyan);
         }
 
-        /* --- Hero Section --- */
-        .hero-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
-        }
-        .hero-text h1 {
-            font-family: 'Orbitron'; font-size: 4rem; line-height: 1.1; margin-bottom: 1rem;
-        }
-        .hero-text .glitch {
-            color: var(--text-main); position: relative;
-        }
-        .hero-text .highlight { color: var(--neon-cyan); text-shadow: 0 0 20px rgba(0, 243, 255, 0.5); }
-        
-        /* Typing Effect Container */
-        .typing-container {
-            font-size: 1.2rem; color: var(--neon-green);
-            border-left: 2px solid var(--neon-green);
-            padding-left: 10px; margin-bottom: 2rem;
-            height: 1.5em; overflow: hidden;
-        }
+        h1 { font-family: 'Orbitron'; font-size: 3.5rem; margin-bottom: 10px; line-height: 1; }
+        h2 { font-family: 'Orbitron'; color: var(--neon-purple); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 15px; }
+        p { font-size: 1.1rem; line-height: 1.6; color: #bbb; margin-bottom: 1rem; }
 
-        .profile-wrapper {
-            position: relative; width: 350px; height: 350px; margin: auto;
-            perspective: 1000px;
-        }
-        .profile-card-3d {
-            width: 100%; height: 100%;
-            background: url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80');
-            background-size: cover; background-position: center;
-            border-radius: 20px;
-            border: 2px solid var(--neon-cyan);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
-            transition: transform 0.1s; /* JS updates this */
-        }
-
-        /* --- 3D Cards for Projects --- */
-        .card-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 2rem;
-        }
-        .tilt-card {
-            background: rgba(10, 10, 15, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 15px;
-            padding: 2rem;
-            position: relative;
-            backdrop-filter: blur(10px);
-            transition: transform 0.2s, box-shadow 0.2s;
-            transform-style: preserve-3d;
-        }
-        /* Hover handled by JS for tilt, but basic CSS hover: */
-        .tilt-card:hover {
-            border-color: var(--neon-purple);
-            box-shadow: 0 0 30px rgba(188, 19, 254, 0.2);
-        }
-        .tilt-content { transform: translateZ(30px); } /* Pop out effect */
-        
-        .tech-tag {
-            display: inline-block; padding: 4px 10px; margin: 2px;
+        .tag {
+            display: inline-block; padding: 4px 10px; margin-right: 5px; margin-bottom: 5px;
             border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
-            font-size: 0.7rem; text-transform: uppercase;
+            font-family: 'JetBrains Mono'; font-size: 0.75rem; text-transform: uppercase;
         }
 
-        /* --- Achievements Timeline --- */
-        .timeline-box {
-            border-left: 2px solid var(--neon-purple);
-            padding-left: 20px; margin-left: 10px;
-        }
-        .timeline-entry {
-            margin-bottom: 2rem; position: relative;
-        }
-        .timeline-entry::before {
-            content: ''; position: absolute; left: -26px; top: 5px;
-            width: 10px; height: 10px; background: var(--bg-deep);
-            border: 2px solid var(--neon-purple); border-radius: 50%;
-            box-shadow: 0 0 10px var(--neon-purple);
+        /* --- HOME GRID --- */
+        .hero-section { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 3rem; align-items: center; }
+        .profile-pic {
+            width: 100%; height: 400px; object-fit: cover;
+            border-radius: 20px; border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+            filter: contrast(1.1) brightness(0.9);
         }
 
-        /* --- Sound Wave Animation --- */
-        .sound-wave {
-            display: flex; align-items: flex-end; height: 30px; gap: 3px;
+        /* --- ARSENAL (SKILLS) GRID --- */
+        .arsenal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .arsenal-card {
+            background: rgba(255,255,255,0.03); border: 1px solid #333;
+            padding: 1.5rem; text-align: center; transition: 0.3s;
         }
-        .bar {
-            width: 4px; background: var(--neon-purple);
-            animation: bounce 1s infinite ease-in-out;
-        }
-        .bar:nth-child(2) { animation-duration: 0.8s; }
-        .bar:nth-child(3) { animation-duration: 1.2s; }
-        .bar:nth-child(4) { animation-duration: 0.5s; }
-        @keyframes bounce { 0%, 100% { height: 5px; } 50% { height: 25px; } }
+        .arsenal-card:hover { border-color: var(--neon-green); transform: translateY(-5px); }
+        .arsenal-icon { font-size: 2.5rem; margin-bottom: 1rem; color: var(--neon-green); }
 
-        /* --- Map Button --- */
-        .cyber-btn {
-            display: inline-block; padding: 15px 30px;
-            background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), rgba(188, 19, 254, 0.1));
-            border: 1px solid var(--neon-cyan);
-            color: white; text-decoration: none;
-            font-family: 'Orbitron'; letter-spacing: 2px;
-            margin-top: 1rem;
-            transition: 0.3s;
+        /* --- PROJECTS --- */
+        .project-detailed { display: grid; grid-template-columns: 300px 1fr; gap: 2rem; margin-bottom: 3rem; border: 1px solid #333; padding: 1rem; border-radius: 12px; background: rgba(0,0,0,0.4); }
+        .project-img { width: 100%; height: 250px; object-fit: cover; border-radius: 8px; border: 1px solid #444; }
+        .spec-list { font-family: 'JetBrains Mono'; font-size: 0.9rem; color: #888; list-style: none; margin-top: 1rem; }
+        .spec-list li { margin-bottom: 5px; }
+        .spec-list li::before { content: '>'; color: var(--neon-cyan); margin-right: 8px; }
+
+        /* --- LIBRARY (BOOKS) --- */
+        .book-shelf { display: flex; gap: 2rem; padding: 2rem 0; overflow-x: auto; }
+        .book {
+            width: 150px; height: 220px;
+            background: linear-gradient(45deg, #222, #333);
+            border: 1px solid #555; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            padding: 1rem; position: relative; transition: 0.3s;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+        }
+        .book:hover { transform: translateY(-10px) rotateY(-10deg); border-color: var(--neon-purple); }
+        .book::after { content: ''; position: absolute; left: 5px; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.1); }
+
+        /* --- CONTACT MAP --- */
+        .map-frame {
+            width: 100%; height: 300px;
+            background: #111; border: 1px solid var(--neon-cyan);
+            display: flex; align-items: center; justify-content: center;
             position: relative; overflow: hidden;
         }
-        .cyber-btn:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 30px var(--neon-cyan); }
+        .map-btn {
+            background: var(--neon-cyan); color: #000; padding: 1rem 2rem;
+            text-decoration: none; font-weight: bold; font-family: 'Orbitron';
+            z-index: 2; box-shadow: 0 0 20px var(--neon-cyan);
+        }
+        .coordinate-grid {
+            position: absolute; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px; opacity: 0.5;
+        }
 
-        /* --- Responsiveness --- */
         @media (max-width: 768px) {
-            .hero-grid, .card-grid { grid-template-columns: 1fr; }
-            .navbar { padding: 15px; flex-direction: column; gap: 10px; }
-            .nav-links { display: flex; flex-wrap: wrap; justify-content: center; }
-            .nav-links button { margin: 5px 10px; }
+            .navbar { flex-direction: column; gap: 15px; padding: 15px; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            .hero-section, .project-detailed { grid-template-columns: 1fr; }
             h1 { font-size: 2.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <div id="cursor"></div>
-    
+    <div id="boot-screen">
+        <div id="boot-log"></div>
+    </div>
+
+    <div id="cursor"></div><div id="cursor-dot"></div>
+    <div class="scanline"></div>
     <canvas id="canvas-bg"></canvas>
 
     <nav class="navbar">
         <div class="brand" data-hover>TEJAS_NIRANJAN</div>
         <div class="nav-links">
-            <button class="active" onclick="switchTab('home')" data-hover>OVERVIEW</button>
-            <button onclick="switchTab('projects')" data-hover>PROJECTS</button>
-            <button onclick="switchTab('achievements')" data-hover>AWARDS</button>
-            <button onclick="switchTab('contact')" data-hover>CONTACT</button>
+            <button class="nav-btn active" onclick="switchTab('home')" data-hover>HOME</button>
+            <button class="nav-btn" onclick="switchTab('arsenal')" data-hover>ARSENAL</button>
+            <button class="nav-btn" onclick="switchTab('projects')" data-hover>PROJECTS</button>
+            <button class="nav-btn" onclick="switchTab('library')" data-hover>LIBRARY</button>
+            <button class="nav-btn" onclick="switchTab('achievements')" data-hover>AWARDS</button>
+            <button class="nav-btn" onclick="switchTab('contact')" data-hover>UPLINK</button>
         </div>
     </nav>
 
     <div class="container">
 
         <section id="home" class="page active">
-            <div class="hero-grid">
-                <div class="hero-text">
-                    <p style="color: var(--neon-purple); letter-spacing: 3px; margin-bottom: 10px;">// SYSTEM INITIALIZED</p>
-                    <h1>I AM <span class="highlight">TEJAS</span></h1>
-                    
-                    <div class="typing-container">
-                        <span id="typewriter"></span><span style="animation: blink 1s infinite">|</span>
+            <div class="hero-section">
+                <div>
+                    <div style="font-family: 'JetBrains Mono'; color: var(--neon-green); margin-bottom: 10px;">
+                        > SYSTEM_STATUS: ONLINE<br>> LOCATION: JHANSI, UP, IND
                     </div>
-
-                    <p style="line-height: 1.8; color: #a0a0a0; margin-bottom: 2rem;">
-                        Grade 7 Innovator at Rani Laxmibai Public School. Combining hardware, code, and creativity to build the future. 
-                        My stack includes <span style="color:var(--neon-green)">IoT</span>, <span style="color:var(--neon-purple)">Music</span>, and <span style="color:var(--neon-cyan)">Python</span>.
+                    <h1>TEJAS <span style="color: transparent; -webkit-text-stroke: 1px var(--neon-purple);">NIRANJAN</span></h1>
+                    <p style="font-size: 1.5rem; color: var(--neon-cyan);">Hardware Enthusiast // Coder // Musician</p>
+                    <p>
+                        I am a 7th-grade student at Rani Laxmibai Public School with a passion for bridging the gap between digital code and physical reality. 
+                        Whether it's automating agriculture with IoT or composing melodies on a synthesizer, I build things that work.
                     </p>
-
-                    <div style="display: flex; gap: 20px;">
-                        <div class="tilt-card" style="padding: 1rem; width: fit-content;" data-hover>
-                            <div class="sound-wave">
-                                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                            </div>
-                            <small style="color: var(--neon-purple)">MUSIC PRODUCER</small>
-                        </div>
-                        <div class="tilt-card" style="padding: 1rem; width: fit-content;" data-hover>
-                            <i class="fas fa-microchip fa-lg" style="color: var(--neon-green)"></i>
-                            <br><small style="color: var(--neon-green)">IoT ARCHITECT</small>
-                        </div>
+                    
+                    <div style="margin-top: 2rem; border-left: 2px solid var(--neon-purple); padding-left: 1rem;">
+                        <h3 style="color: #fff; margin-bottom: 5px;">CURRENT FOCUS:</h3>
+                        <p style="margin:0; font-size: 0.9rem;">Advanced ESP32 Networking & Python Data Structures.</p>
                     </div>
                 </div>
-
-                <div class="profile-wrapper" id="profile-container">
-                    <div class="profile-card-3d" id="profile-card"></div>
+                
+                <div style="position: relative;">
+                    <img src="https://images.unsplash.com/photo-1531297461136-82lw9z1.jpg?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="profile-pic" alt="Tejas Workspace">
+                    <div style="position: absolute; bottom: -20px; right: -20px; background: #000; padding: 1rem; border: 1px solid var(--neon-green);">
+                        <div style="color: var(--neon-green); font-family: 'JetBrains Mono';">
+                            INT: 99<br>STR: 85<br>LUCK: 100
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div style="margin-top: 4rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                <div class="tilt-card" style="text-align: center;" data-hover>
-                    <h3 style="color: var(--neon-cyan)">MATH</h3>
-                    <div style="width: 100%; background: #333; height: 4px; margin-top: 10px;"><div style="width: 98%; background: var(--neon-cyan); height: 100%;"></div></div>
+            <div class="arsenal-grid" style="margin-top: 4rem;">
+                <div class="glass-panel" style="text-align: center; margin-bottom: 0;">
+                    <h1 style="font-size: 2.5rem; color: var(--neon-cyan);">95%</h1>
+                    <p>MATH ACCURACY</p>
                 </div>
-                <div class="tilt-card" style="text-align: center;" data-hover>
-                    <h3 style="color: var(--neon-green)">CHEMISTRY</h3>
-                    <div style="width: 100%; background: #333; height: 4px; margin-top: 10px;"><div style="width: 95%; background: var(--neon-green); height: 100%;"></div></div>
+                <div class="glass-panel" style="text-align: center; margin-bottom: 0;">
+                    <h1 style="font-size: 2.5rem; color: var(--neon-purple);">12+</h1>
+                    <p>GOLD MEDALS</p>
                 </div>
-                <div class="tilt-card" style="text-align: center;" data-hover>
-                    <h3 style="color: var(--neon-purple)">COMPUTERS</h3>
-                    <div style="width: 100%; background: #333; height: 4px; margin-top: 10px;"><div style="width: 99%; background: var(--neon-purple); height: 100%;"></div></div>
+                <div class="glass-panel" style="text-align: center; margin-bottom: 0;">
+                    <h1 style="font-size: 2.5rem; color: var(--neon-green);">2</h1>
+                    <p>DEPLOYED IOT SYSTEMS</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="arsenal" class="page">
+            <h2><i class="fas fa-tools"></i> TECHNICAL ARSENAL</h2>
+            
+            <h3 style="margin-bottom: 1rem; color: #888;">// HARDWARE STACK</h3>
+            <div class="arsenal-grid" style="margin-bottom: 3rem;">
+                <div class="arsenal-card" data-hover>
+                    <i class="fas fa-microchip arsenal-icon"></i>
+                    <h4>ESP32 / NodeMCU</h4>
+                    <small>Wireless IoT Modules</small>
+                </div>
+                <div class="arsenal-card" data-hover>
+                    <i class="fas fa-gamepad arsenal-icon" style="color: var(--neon-purple);"></i>
+                    <h4>Sensors</h4>
+                    <small>IR, Ultrasonic, Soil Capacitive</small>
+                </div>
+                <div class="arsenal-card" data-hover>
+                    <i class="fas fa-plug arsenal-icon" style="color: var(--neon-cyan);"></i>
+                    <h4>Circuitry</h4>
+                    <small>Relays, Servos, Breadboards</small>
+                </div>
+                <div class="arsenal-card" data-hover>
+                    <i class="fas fa-wave-square arsenal-icon" style="color: orange;"></i>
+                    <h4>Instruments</h4>
+                    <small>Synthesizer & Guitar</small>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 1rem; color: #888;">// SOFTWARE PROTOCOLS</h3>
+            <div class="arsenal-grid">
+                <div class="arsenal-card" data-hover>
+                    <i class="fab fa-python arsenal-icon" style="color: #ffd43b;"></i>
+                    <h4>Python</h4>
+                    <small>Logic & Data</small>
+                </div>
+                <div class="arsenal-card" data-hover>
+                    <i class="fas fa-code arsenal-icon" style="color: #007acc;"></i>
+                    <h4>C++ / Arduino</h4>
+                    <small>Embedded Control</small>
+                </div>
+                <div class="arsenal-card" data-hover>
+                    <i class="fas fa-terminal arsenal-icon" style="color: #ccc;"></i>
+                    <h4>SinricPro API</h4>
+                    <small>IoT Cloud Handshake</small>
                 </div>
             </div>
         </section>
 
         <section id="projects" class="page">
-            <h2 style="font-family: 'Orbitron'; margin-bottom: 2rem;">// DEPLOYED_PROJECTS</h2>
-            
-            <div class="card-grid">
-                <div class="tilt-card" data-hover>
-                    <div class="tilt-content">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <h3 style="color: var(--neon-green)">Smart Plant System</h3>
-                            <i class="fas fa-leaf fa-2x" style="color: var(--neon-green)"></i>
+            <h2><i class="fas fa-project-diagram"></i> ACTIVE PROJECTS</h2>
+
+            <div class="glass-panel">
+                <div class="project-detailed">
+                    <img src="https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="project-img" alt="Plant System">
+                    <div>
+                        <h3 style="color: var(--neon-green); font-size: 1.8rem;">AUTOMATIC BIO-HYDRATION SYSTEM</h3>
+                        <div style="margin: 10px 0;">
+                            <span class="tag">NodeMCU ESP8266</span> <span class="tag">Alexa API</span> <span class="tag">C++</span>
                         </div>
-                        <p style="margin: 1rem 0; color: #bbb;">IoT gadget for farmers using NodeMCU. Features Auto-Watering via Capacitive Soil Sensor v2.0 and manual App control.</p>
-                        <div style="margin-bottom: 1rem;">
-                            <span class="tech-tag">NodeMCU</span>
-                            <span class="tech-tag">SinricPro</span>
-                            <span class="tech-tag">Alexa API</span>
-                            <span class="tech-tag">Relay Module</span>
-                        </div>
-                        <div style="padding: 10px; background: rgba(0,255,0,0.1); border-left: 3px solid var(--neon-green);">
-                            <small>STATUS: <i class="fas fa-circle" style="font-size: 8px;"></i> ONLINE</small>
+                        <p>A smart agriculture solution designed to eliminate manual watering. The system continuously polls soil data and makes autonomous decisions.</p>
+                        
+                        <div style="background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 8px;">
+                            <h4 style="color: #fff; margin-bottom: 0.5rem;">TECHNICAL SPECIFICATIONS:</h4>
+                            <ul class="spec-list">
+                                <li><strong>Core:</strong> NodeMCU ESP8266 (Wi-Fi Enabled)</li>
+                                <li><strong>Input:</strong> Capacitive Soil Moisture Sensor V2.0 (Corrosion Resistant)</li>
+                                <li><strong>Output:</strong> 2-Channel Relay Module + 5V Submersible Pump</li>
+                                <li><strong>Display:</strong> LCD I2C 1602 (Real-time Dry/Wet Status)</li>
+                                <li><strong>Logic:</strong> ADC Value analysis -> Relay Trigger</li>
+                                <li><strong>Remote:</strong> SinricPro App + Amazon Alexa Voice Control</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="tilt-card" data-hover>
-                    <div class="tilt-content">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <h3 style="color: var(--neon-cyan)">Smart Parking Infrastructure</h3>
-                            <i class="fas fa-car fa-2x" style="color: var(--neon-cyan)"></i>
+            <div class="glass-panel">
+                <div class="project-detailed">
+                    <img src="https://plus.unsplash.com/premium_photo-1682147309553-49fbda22c61a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="project-img" alt="Parking System">
+                    <div>
+                        <h3 style="color: var(--neon-cyan); font-size: 1.8rem;">MULTILEVEL SMART PARKING GRID</h3>
+                        <div style="margin: 10px 0;">
+                            <span class="tag">ESP32</span> <span class="tag">IR Arrays</span> <span class="tag">Servo Mechanics</span>
                         </div>
-                        <p style="margin: 1rem 0; color: #bbb;">Multilevel parking solution to save fuel/time. 6-Slot monitoring system with IR Sensors and Servo Boom Barrier.</p>
-                        <div style="margin-bottom: 1rem;">
-                            <span class="tech-tag">ESP32</span>
-                            <span class="tech-tag">8x IR Sensors</span>
-                            <span class="tech-tag">Servo SG90</span>
-                            <span class="tech-tag">LCD 20x4</span>
+                        <p>An urban infrastructure prototype addressing parking congestion. It manages a 6-slot bay with automated entry denial if capacity is reached.</p>
+                        
+                        <div style="background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 8px;">
+                            <h4 style="color: #fff; margin-bottom: 0.5rem;">TECHNICAL SPECIFICATIONS:</h4>
+                            <ul class="spec-list">
+                                <li><strong>Controller:</strong> ESP32 WROOM (High processing power)</li>
+                                <li><strong>Sensor Array:</strong> 2x IR (Gate) + 6x IR (Slot Occupancy)</li>
+                                <li><strong>Actuator:</strong> SG90 Servo Motor (Boom Barrier)</li>
+                                <li><strong>Feedback:</strong> LCD I2C 20x4 + Active Buzzer (Entry/Exit tones)</li>
+                                <li><strong>Algorithm:</strong> Counter variable increments on entry, decrements on exit. Locks gate at count=6.</li>
+                            </ul>
                         </div>
-                        <div style="padding: 10px; background: rgba(0,243,255,0.1); border-left: 3px solid var(--neon-cyan);">
-                            <small>IMPACT: URBAN OPTIMIZATION</small>
-                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="library" class="page">
+            <h2><i class="fas fa-book"></i> DATA ARCHIVES (READING)</h2>
+            <p>Scanning localized knowledge database. Favorite genres: Sci-Fi, Technology, and Adventure.</p>
+            
+            <div class="book-shelf">
+                <div class="book" data-hover>
+                    <div>
+                        <i class="fas fa-hat-wizard fa-2x" style="color: var(--neon-purple); margin-bottom: 10px;"></i>
+                        <h4>Harry Potter</h4>
+                        <small>J.K. Rowling</small>
+                    </div>
+                </div>
+                <div class="book" data-hover>
+                    <div>
+                        <i class="fas fa-dragon fa-2x" style="color: orange; margin-bottom: 10px;"></i>
+                        <h4>Wings of Fire</h4>
+                        <small>A.P.J. Abdul Kalam</small>
+                    </div>
+                </div>
+                <div class="book" data-hover>
+                    <div>
+                        <i class="fas fa-rocket fa-2x" style="color: var(--neon-cyan); margin-bottom: 10px;"></i>
+                        <h4>A Brief History of Time</h4>
+                        <small>Stephen Hawking</small>
+                    </div>
+                </div>
+                <div class="book" data-hover>
+                    <div>
+                        <i class="fas fa-code fa-2x" style="color: var(--neon-green); margin-bottom: 10px;"></i>
+                        <h4>Clean Code</h4>
+                        <small>Tech Reference</small>
                     </div>
                 </div>
             </div>
         </section>
 
         <section id="achievements" class="page">
-            <h2 style="font-family: 'Orbitron'; margin-bottom: 2rem;">// ACADEMIC_LOGS</h2>
+            <h2><i class="fas fa-trophy"></i> HALL OF FAME</h2>
             
-            <div class="tilt-card" style="max-width: 800px; margin: 0 auto;">
-                <div class="timeline-box">
-                    <div class="timeline-entry">
-                        <h3 style="color: var(--neon-purple)">GRADE 6</h3>
-                        <p>Gold Medal in NSO (National Science Olympiad) & IMO (Maths).</p>
-                    </div>
-                    <div class="timeline-entry">
-                        <h3 style="color: var(--neon-purple)">GRADE 5 - INTERNATIONAL RANK</h3>
-                        <p><strong>International 5th Rank</strong> in ICSO.</p>
-                        <p>Gold in IMO & NSO.</p>
-                    </div>
-                    <div class="timeline-entry">
-                        <h3 style="color: white)">GRADE 4 - QUADRUPLE GOLD</h3>
-                        <p>Gold in IMO, NSO, NCO (Cyber), and IEO (English).</p>
-                    </div>
-                    <div class="timeline-entry">
-                        <h3 style="color: #888">EARLY YEARS (GR 1-3)</h3>
-                        <p>Consistent Gold Medals in IMO & NSO Level 1.</p>
-                    </div>
+            <div class="glass-panel">
+                <h3 style="color: var(--neon-purple);">SOF OLYMPIAD TRAJECTORY</h3>
+                <div style="overflow-x: auto; margin-top: 1rem;">
+                    <table style="width: 100%; border-collapse: collapse; color: #ccc;">
+                        <tr style="border-bottom: 1px solid #333; text-align: left;">
+                            <th style="padding: 10px;">CLASS</th>
+                            <th style="padding: 10px;">ACHIEVEMENT</th>
+                            <th style="padding: 10px;">SUBJECTS</th>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #222;">
+                            <td style="padding: 10px; color: var(--neon-cyan);">6th</td>
+                            <td style="padding: 10px;">GOLD MEDAL</td>
+                            <td style="padding: 10px;">NSO, IMO</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #222;">
+                            <td style="padding: 10px; color: var(--neon-cyan);">5th</td>
+                            <td style="padding: 10px;">INTL RANK 5 & GOLD</td>
+                            <td style="padding: 10px;">ICSO (Rank 5), IMO, NSO</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #222;">
+                            <td style="padding: 10px; color: var(--neon-cyan);">4th</td>
+                            <td style="padding: 10px;">QUADRUPLE GOLD</td>
+                            <td style="padding: 10px;">IMO, NSO, NCO, IEO</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; color: var(--neon-cyan);">1st - 3rd</td>
+                            <td style="padding: 10px;">CONSISTENT GOLD</td>
+                            <td style="padding: 10px;">IMO, NSO (Level 1)</td>
+                        </tr>
+                    </table>
                 </div>
+            </div>
+
+            <div class="glass-panel">
+                <h3 style="color: var(--neon-green);">MUSIC & ARTS</h3>
+                <ul style="list-style: none; margin-top: 10px;">
+                    <li style="margin-bottom: 10px;"><i class="fas fa-check" style="color: var(--neon-green);"></i> <strong>Synthesizer:</strong> Proficient in playing classical and modern tunes.</li>
+                    <li><i class="fas fa-check" style="color: var(--neon-green);"></i> <strong>Guitar:</strong> Acoustic rythm and lead basics.</li>
+                </ul>
             </div>
         </section>
 
         <section id="contact" class="page">
-            <div style="text-align: center; margin-top: 3rem;">
-                <h2 style="font-family: 'Orbitron'; font-size: 3rem;">ESTABLISH LINK</h2>
-                <p style="color: #888; margin-bottom: 3rem;">Initiate communication protocol.</p>
+            <h2><i class="fas fa-satellite"></i> SECURE UPLINK</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div class="glass-panel" style="text-align: center;" data-hover>
+                    <i class="fas fa-phone-alt fa-3x" style="color: var(--neon-green); margin-bottom: 1rem;"></i>
+                    <h4>+91 95555 71309</h4>
+                    <small>Voice Line</small>
+                </div>
+                <div class="glass-panel" style="text-align: center;" data-hover>
+                    <i class="fas fa-envelope fa-3x" style="color: var(--neon-purple); margin-bottom: 1rem;"></i>
+                    <h4>tejas.blynk@gmail.com</h4>
+                    <small>Digital Mail</small>
+                </div>
+            </div>
 
-                <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
-                    <div class="tilt-card" style="min-width: 300px;" data-hover>
-                        <i class="fas fa-phone fa-2x" style="color: var(--neon-green)"></i>
-                        <h3 style="margin: 1rem 0;">+91 95555 71309</h3>
-                    </div>
-                    <div class="tilt-card" style="min-width: 300px;" data-hover>
-                        <i class="fas fa-envelope fa-2x" style="color: var(--neon-purple)"></i>
-                        <h3 style="margin: 1rem 0;">tejas.blynk@gmail.com</h3>
+            <div class="glass-panel" style="padding: 0; border: none;">
+                <div class="map-frame">
+                    <div class="coordinate-grid"></div>
+                    <div style="z-index: 1; text-align: center;">
+                        <div style="color: var(--neon-cyan); margin-bottom: 1rem; font-family: 'JetBrains Mono';">
+                            LAT: 25.455871 | LNG: 78.635468
+                        </div>
+                        <a href="https://www.google.com/maps/search/?api=1&query=25.455871349817613,78.63546875323021" target="_blank" class="map-btn">
+                            <i class="fas fa-external-link-alt"></i> OPEN SAT-NAV
+                        </a>
                     </div>
                 </div>
-
-                <div class="tilt-card" style="margin-top: 3rem; background: rgba(0,0,0,0.8);" data-hover>
-                    <i class="fas fa-satellite-dish fa-2x" style="color: var(--neon-cyan)"></i>
-                    <h3 style="margin-top: 1rem;">TARGET COORDINATES</h3>
-                    <p style="font-family: 'JetBrains Mono'; color: var(--neon-cyan);">25.455871, 78.635468</p>
-                    <p style="margin-bottom: 1rem; color: #888;">FJ4P+764 Faculty Residence Rd, BIET Campus, Jhansi</p>
-                    
-                    <a href="https://www.google.com/maps/search/?api=1&query=25.455871349817613,78.63546875323021" target="_blank" class="cyber-btn">
-                        <i class="fas fa-map-marker-alt"></i> LAUNCH SATELLITE MAP
-                    </a>
+                <div style="padding: 1rem; background: #050505;">
+                    <p style="text-align: center; margin: 0; font-size: 0.9rem; color: #666;">
+                        ADDRESS: FJ4P+764 C-16 Type 4, Faculty Residence Rd, BIET Campus, Jhansi, UP 284128
+                    </p>
                 </div>
             </div>
         </section>
@@ -382,130 +464,99 @@
     </div>
 
     <script>
-        // --- 1. Custom Cursor Logic ---
-        const cursor = document.getElementById('cursor');
-        const hoverElements = document.querySelectorAll('[data-hover]');
+        // --- BOOT SEQUENCE ---
+        const bootScreen = document.getElementById('boot-screen');
+        const bootLog = document.getElementById('boot-log');
+        const logs = [
+            "INITIALIZING BIOS...",
+            "CHECKING MEMORY... 16GB OK",
+            "LOADING KERNEL... OK",
+            "MOUNTING VOLUMES... OK",
+            "CONNECTING TO NEURAL NET...",
+            "WELCOME USER: TEJAS"
+        ];
+        
+        let delay = 0;
+        logs.forEach((line, index) => {
+            setTimeout(() => {
+                bootLog.innerHTML += `<div>> ${line}</div>`;
+            }, delay);
+            delay += 300;
+        });
 
+        setTimeout(() => {
+            bootScreen.style.opacity = '0';
+            setTimeout(() => { bootScreen.style.display = 'none'; }, 500);
+        }, 2200);
+
+        // --- CURSOR ---
+        const cursor = document.getElementById('cursor');
+        const dot = document.getElementById('cursor-dot');
+        
         document.addEventListener('mousemove', (e) => {
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
+            dot.style.left = e.clientX + 'px';
+            dot.style.top = e.clientY + 'px';
         });
 
-        hoverElements.forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        document.querySelectorAll('[data-hover]').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovered'));
         });
 
-        // --- 2. Particle Background System ---
+        // --- BACKGROUND PARTICLES ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
         const particles = [];
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2;
-                this.speedX = Math.random() * 1 - 0.5;
-                this.speedY = Math.random() * 1 - 0.5;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if(this.x > canvas.width || this.x < 0) this.speedX *= -1;
-                if(this.y > canvas.height || this.y < 0) this.speedY *= -1;
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(0, 243, 255, 0.3)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        for(let i=0; i<80; i++) particles.push(new Particle());
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for(let i=0; i<particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-                // Connect particles
-                for(let j=i; j<particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const distance = Math.sqrt(dx*dx + dy*dy);
-                    if(distance < 100) {
-                        ctx.strokeStyle = `rgba(0, 243, 255, ${0.1 - distance/1000})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animateParticles);
-        }
-        animateParticles();
-
-        // --- 3. 3D Tilt Logic ---
-        document.querySelectorAll('.tilt-card').forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg rotation
-                const rotateY = ((x - centerX) / centerX) * 10;
-
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        for(let i=0; i<60; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                size: Math.random() * 2
             });
-
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = `perspective(1000px) rotateX(0) rotateY(0)`;
-            });
-        });
-
-        // Profile Picture specific Tilt
-        const profileContainer = document.getElementById('profile-container');
-        const profileCard = document.getElementById('profile-card');
-        
-        profileContainer.addEventListener('mousemove', (e) => {
-            const rect = profileContainer.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width - 0.5;
-            const y = (e.clientY - rect.top) / rect.height - 0.5;
-            profileCard.style.transform = `rotateY(${x * 30}deg) rotateX(${y * -30}deg)`;
-        });
-        profileContainer.addEventListener('mouseleave', () => {
-            profileCard.style.transform = `rotateY(0) rotateX(0)`;
-        });
-
-        // --- 4. Typing Effect ---
-        const text = "IoT Developer | Musician | Coder";
-        const typeWriterElement = document.getElementById('typewriter');
-        let i = 0;
-        function typeWriter() {
-            if (i < text.length) {
-                typeWriterElement.innerHTML += text.charAt(i);
-                i++;
-                setTimeout(typeWriter, 100);
-            }
         }
-        setTimeout(typeWriter, 1000);
 
-        // --- 5. Tab Switching ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+        function animate() {
+            ctx.fillStyle = 'rgba(2, 2, 5, 0.2)'; // Trails
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                
+                ctx.fillStyle = '#00f3ff';
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+
+                particles.forEach(p2 => {
+                    let d = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if(d < 100) {
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${1 - d/100})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- TAB SWITCHER ---
+        function switchTab(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            // Find button by text roughly matching the id
+            const buttons = Array.from(document.querySelectorAll('.nav-btn'));
+            const btn = buttons.find(b => b.getAttribute('onclick').includes(id));
+            if(btn) btn.classList.add('active');
         }
     </script>
 </body>
