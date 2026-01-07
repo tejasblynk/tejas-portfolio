@@ -3,353 +3,509 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tejas Niranjan | IoT & Cybernetics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <title>Tejas Niranjan | System Online</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg-dark: #0a0a12; /* Deep space black */
-            --bg-panel: rgba(20, 25, 40, 0.75); /* Glass panel */
-            --accent-neon: #00ff9d; /* Cyberpunk Green/Cyan */
-            --accent-purple: #bd00ff; /* Synthwave Purple */
-            --text-primary: #ffffff;
-            --text-muted: #8f9ba8;
-            --border-circuit: 1px solid rgba(0, 255, 157, 0.2);
+            --bg-deep: #050505;
+            --neon-cyan: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-green: #0aff0a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(0, 243, 255, 0.2);
+            --text-main: #e0e0e0;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; /* Hide default cursor */ }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            min-height: 100vh;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
             overflow-x: hidden;
-            /* Circuit Board Background Pattern */
-            background-image: 
-                linear-gradient(rgba(10, 10, 18, 0.9), rgba(10, 10, 18, 0.9)),
-                url('https://img.freepik.com/free-vector/blue-circuit-board-background_23-2148343671.jpg?w=1380&t=st=1705080000~exp=1705080600~hmac=e1');
-            background-size: cover;
-            background-attachment: fixed;
+            height: 100vh;
         }
 
-        /* --- Typography --- */
-        h1, h2, h3, h4 { font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
-        h1 { font-size: 3.5rem; line-height: 1; text-shadow: 0 0 10px rgba(0, 255, 157, 0.5); }
-        h2 { font-size: 2rem; color: var(--accent-neon); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
-        .text-purple { color: var(--accent-purple); text-shadow: 0 0 10px rgba(189, 0, 255, 0.5); }
+        /* --- Custom Cursor --- */
+        #cursor {
+            position: fixed; top: 0; left: 0;
+            width: 20px; height: 20px;
+            border: 2px solid var(--neon-cyan);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            transition: width 0.2s, height 0.2s, background 0.2s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 50px; height: 50px;
+            background: rgba(0, 243, 255, 0.2);
+            border-color: var(--neon-purple);
+        }
 
-        /* --- Layout & Nav --- */
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; padding-top: 80px; }
-        
+        /* --- Background Canvas --- */
+        #canvas-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+        }
+
+        /* --- Navigation --- */
         .navbar {
-            position: fixed; top: 0; left: 0; width: 100%;
-            background: rgba(10, 10, 18, 0.95);
+            position: fixed; top: 0; width: 100%;
+            padding: 20px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(5, 5, 5, 0.8);
             backdrop-filter: blur(10px);
-            z-index: 100; border-bottom: var(--border-circuit);
-            padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
         }
-        .brand { font-family: 'Rajdhani'; font-weight: 700; font-size: 1.5rem; color: var(--accent-neon); }
-        .nav-links { display: flex; gap: 2rem; }
-        .nav-btn {
-            background: none; border: none; color: var(--text-muted);
-            font-family: 'Rajdhani'; font-weight: 600; font-size: 1rem;
-            cursor: pointer; transition: 0.3s; position: relative;
-            padding: 5px 0;
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
         }
-        .nav-btn::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 2px;
-            background: var(--accent-neon); transition: 0.3s;
+        .nav-links button {
+            background: transparent; border: none;
+            color: var(--text-main);
+            font-family: 'Orbitron'; margin-left: 30px;
+            font-size: 0.9rem; letter-spacing: 2px;
+            position: relative; overflow: hidden;
         }
-        .nav-btn:hover, .nav-btn.active { color: var(--accent-neon); }
-        .nav-btn.active::after { width: 100%; }
+        .nav-links button::before {
+            content: ''; position: absolute; bottom: 0; left: -100%;
+            width: 100%; height: 2px; background: var(--neon-purple);
+            transition: 0.3s;
+        }
+        .nav-links button:hover::before, .nav-links button.active::before { left: 0; }
+        .nav-links button:hover { color: var(--neon-purple); text-shadow: 0 0 8px var(--neon-purple); }
 
-        /* --- Glass Panels --- */
-        .panel {
-            background: var(--bg-panel);
-            border: var(--border-circuit);
-            backdrop-filter: blur(16px);
-            border-radius: 16px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+        /* --- Main Layout --- */
+        .container {
+            max-width: 1200px; margin: 100px auto 0; padding: 2rem;
+            min-height: 80vh;
         }
 
-        /* --- Page Switching & Glitch Effect --- */
-        .page-section { display: none; opacity: 0; transform: translateY(20px); transition: 0.5s all ease; }
-        .page-section.active { display: block; opacity: 1; transform: translateY(0); }
+        /* --- Page Transitions --- */
+        .page {
+            display: none;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .page.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- Hero Section --- */
+        .hero-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+        }
+        .hero-text h1 {
+            font-family: 'Orbitron'; font-size: 4rem; line-height: 1.1; margin-bottom: 1rem;
+        }
+        .hero-text .glitch {
+            color: var(--text-main); position: relative;
+        }
+        .hero-text .highlight { color: var(--neon-cyan); text-shadow: 0 0 20px rgba(0, 243, 255, 0.5); }
         
-        .main-content.glitch-active { animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite; }
-        @keyframes glitch-anim {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
+        /* Typing Effect Container */
+        .typing-container {
+            font-size: 1.2rem; color: var(--neon-green);
+            border-left: 2px solid var(--neon-green);
+            padding-left: 10px; margin-bottom: 2rem;
+            height: 1.5em; overflow: hidden;
         }
 
-        /* --- Content Styling --- */
-        .hero-split { display: flex; gap: 2rem; align-items: center; }
-        .profile-img-box {
-            width: 300px; height: 300px; flex-shrink: 0;
-            border-radius: 50%; border: 3px solid var(--accent-neon);
-            padding: 5px; position: relative;
+        .profile-wrapper {
+            position: relative; width: 350px; height: 350px; margin: auto;
+            perspective: 1000px;
         }
-        .profile-img-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; filter: grayscale(20%) contrast(120%); }
-        .profile-img-box::before {
-            content: ''; position: absolute; inset: -10px; border-radius: 50%;
-            border: 2px dashed var(--accent-purple); animation: spin 10s linear infinite;
+        .profile-card-3d {
+            width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80');
+            background-size: cover; background-position: center;
+            border-radius: 20px;
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+            transition: transform 0.1s; /* JS updates this */
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .skill-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1.5rem; }
-        .badge {
-            padding: 8px 16px; border-radius: 30px; font-family: 'Rajdhani'; font-weight: 600; font-size: 0.9rem;
-            background: rgba(0, 255, 157, 0.1); color: var(--accent-neon); border: 1px solid var(--accent-neon);
+        /* --- 3D Cards for Projects --- */
+        .card-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 2rem;
         }
-        .badge.purple { background: rgba(189, 0, 255, 0.1); color: var(--accent-purple); border-color: var(--accent-purple); }
-
-        /* --- Project Cards --- */
-        .project-card { display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; }
-        .project-img {
-            height: 300px; border-radius: 12px; overflow: hidden; border: var(--border-circuit);
+        .tilt-card {
+            background: rgba(10, 10, 15, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 2rem;
             position: relative;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, box-shadow 0.2s;
+            transform-style: preserve-3d;
         }
-        .project-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .project-card:hover .project-img img { transform: scale(1.05); }
-        .tech-stack { display: flex; gap: 8px; flex-wrap: wrap; margin: 1rem 0; }
-        .tech-pill {
-            font-size: 0.8rem; padding: 4px 12px; background: #1a1a2e; border-radius: 4px;
-            color: var(--text-muted); border: 1px solid #333; font-family: 'Rajdhani';
+        /* Hover handled by JS for tilt, but basic CSS hover: */
+        .tilt-card:hover {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.2);
+        }
+        .tilt-content { transform: translateZ(30px); } /* Pop out effect */
+        
+        .tech-tag {
+            display: inline-block; padding: 4px 10px; margin: 2px;
+            border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+            font-size: 0.7rem; text-transform: uppercase;
         }
 
-        /* --- Timeline (Olympiads) --- */
-        .timeline { position: relative; border-left: 2px solid var(--accent-purple); margin-left: 10px; padding-left: 25px; }
-        .timeline-item { margin-bottom: 2rem; position: relative; }
-        .timeline-item::before {
-            content: ''; position: absolute; left: -31px; top: 5px; width: 10px; height: 10px;
-            background: var(--bg-dark); border: 2px solid var(--accent-purple); border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-purple);
+        /* --- Achievements Timeline --- */
+        .timeline-box {
+            border-left: 2px solid var(--neon-purple);
+            padding-left: 20px; margin-left: 10px;
         }
-        .timeline-grade { font-family: 'Rajdhani'; color: var(--accent-purple); font-size: 1.1rem; font-weight: 700; }
-        .timeline-content { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-top: 5px; }
-
-        /* --- Contact Map Button --- */
-        .map-btn {
-            display: inline-flex; align-items: center; gap: 10px;
-            background: linear-gradient(45deg, var(--accent-neon), var(--accent-purple));
-            color: var(--bg-dark); text-decoration: none; padding: 1rem 2rem;
-            border-radius: 30px; font-family: 'Rajdhani'; font-weight: 700; font-size: 1.1rem;
-            transition: 0.3s; box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+        .timeline-entry {
+            margin-bottom: 2rem; position: relative;
         }
-        .map-btn:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(0, 255, 157, 0.5); color: black; }
+        .timeline-entry::before {
+            content: ''; position: absolute; left: -26px; top: 5px;
+            width: 10px; height: 10px; background: var(--bg-deep);
+            border: 2px solid var(--neon-purple); border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-purple);
+        }
 
-        /* Responsive */
+        /* --- Sound Wave Animation --- */
+        .sound-wave {
+            display: flex; align-items: flex-end; height: 30px; gap: 3px;
+        }
+        .bar {
+            width: 4px; background: var(--neon-purple);
+            animation: bounce 1s infinite ease-in-out;
+        }
+        .bar:nth-child(2) { animation-duration: 0.8s; }
+        .bar:nth-child(3) { animation-duration: 1.2s; }
+        .bar:nth-child(4) { animation-duration: 0.5s; }
+        @keyframes bounce { 0%, 100% { height: 5px; } 50% { height: 25px; } }
+
+        /* --- Map Button --- */
+        .cyber-btn {
+            display: inline-block; padding: 15px 30px;
+            background: linear-gradient(90deg, rgba(0, 243, 255, 0.1), rgba(188, 19, 254, 0.1));
+            border: 1px solid var(--neon-cyan);
+            color: white; text-decoration: none;
+            font-family: 'Orbitron'; letter-spacing: 2px;
+            margin-top: 1rem;
+            transition: 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .cyber-btn:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 30px var(--neon-cyan); }
+
+        /* --- Responsiveness --- */
         @media (max-width: 768px) {
-            .hero-split, .project-card { grid-template-columns: 1fr; flex-direction: column; }
-            .profile-img-box { width: 200px; height: 200px; margin: 0 auto 2rem; }
-            .navbar { flex-direction: column; gap: 1rem; padding: 1rem; }
-            .container { padding-top: 140px; }
-            h1 { font-size: 2.5rem; text-align: center; }
+            .hero-grid, .card-grid { grid-template-columns: 1fr; }
+            .navbar { padding: 15px; flex-direction: column; gap: 10px; }
+            .nav-links { display: flex; flex-wrap: wrap; justify-content: center; }
+            .nav-links button { margin: 5px 10px; }
+            h1 { font-size: 2.5rem; }
         }
     </style>
 </head>
 <body>
 
+    <div id="cursor"></div>
+    
+    <canvas id="canvas-bg"></canvas>
+
     <nav class="navbar">
-        <div class="brand"><i class="fas fa-microchip"></i> TEJAS.DEV</div>
+        <div class="brand" data-hover>TEJAS_NIRANJAN</div>
         <div class="nav-links">
-            <button class="nav-btn active" onclick="switchPage('home')">// HOME</button>
-            <button class="nav-btn" onclick="switchPage('projects')">//$ PROJECTS</button>
-            <button class="nav-btn" onclick="switchPage('academics')">//$ ACHIEVEMENTS</button>
-            <button class="nav-btn" onclick="switchPage('contact')">//$ CONTACT</button>
+            <button class="active" onclick="switchTab('home')" data-hover>OVERVIEW</button>
+            <button onclick="switchTab('projects')" data-hover>PROJECTS</button>
+            <button onclick="switchTab('achievements')" data-hover>AWARDS</button>
+            <button onclick="switchTab('contact')" data-hover>CONTACT</button>
         </div>
     </nav>
 
-    <main class="container main-content" id="main-container">
-        
-        <section id="home" class="page-section active">
-            <div class="panel hero-split">
-                <div class="profile-img-box">
-                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" alt="Tejas Niranjan Profile">
-                </div>
-                <div>
-                    <h4>SYSTEM_IDENTITY:</h4>
-                    <h1>Tejas <span class="text-purple">Niranjan</span></h1>
-                    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 1rem;">Grade 7 • Rani Laxmibai Public School • Jhansi</p>
-                    <p>A proactive technologist and student focused on embedded systems, full-stack coding, and musical composition. Building the future through hardware and code.</p>
+    <div class="container">
+
+        <section id="home" class="page active">
+            <div class="hero-grid">
+                <div class="hero-text">
+                    <p style="color: var(--neon-purple); letter-spacing: 3px; margin-bottom: 10px;">// SYSTEM INITIALIZED</p>
+                    <h1>I AM <span class="highlight">TEJAS</span></h1>
                     
-                    <div class="skill-badges">
-                        <span class="badge"><i class="fas fa-code"></i> Coding & Development</span>
-                        <span class="badge"><i class="fas fa-robot"></i> IoT & Embedded Systems</span>
-                        <span class="badge purple"><i class="fas fa-music"></i> Synthesizer & Guitar</span>
-                        <span class="badge purple"><i class="fas fa-book-open"></i> Advanced Reading</span>
+                    <div class="typing-container">
+                        <span id="typewriter"></span><span style="animation: blink 1s infinite">|</span>
                     </div>
+
+                    <p style="line-height: 1.8; color: #a0a0a0; margin-bottom: 2rem;">
+                        Grade 7 Innovator at Rani Laxmibai Public School. Combining hardware, code, and creativity to build the future. 
+                        My stack includes <span style="color:var(--neon-green)">IoT</span>, <span style="color:var(--neon-purple)">Music</span>, and <span style="color:var(--neon-cyan)">Python</span>.
+                    </p>
+
+                    <div style="display: flex; gap: 20px;">
+                        <div class="tilt-card" style="padding: 1rem; width: fit-content;" data-hover>
+                            <div class="sound-wave">
+                                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                            </div>
+                            <small style="color: var(--neon-purple)">MUSIC PRODUCER</small>
+                        </div>
+                        <div class="tilt-card" style="padding: 1rem; width: fit-content;" data-hover>
+                            <i class="fas fa-microchip fa-lg" style="color: var(--neon-green)"></i>
+                            <br><small style="color: var(--neon-green)">IoT ARCHITECT</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-wrapper" id="profile-container">
+                    <div class="profile-card-3d" id="profile-card"></div>
                 </div>
             </div>
 
-             <div class="panel">
-                <h2><i class="fas fa-terminal"></i> Core Subjects Focus</h2>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
-                    <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px;">
-                        <i class="fas fa-calculator fa-2x" style="color: var(--accent-neon); margin-bottom: 10px;"></i>
-                        <h3>Mathematics</h3>
-                    </div>
-                     <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px;">
-                        <i class="fas fa-laptop-code fa-2x" style="color: var(--accent-purple); margin-bottom: 10px;"></i>
-                        <h3>Computer Sc.</h3>
-                    </div>
-                     <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px;">
-                        <i class="fas fa-flask fa-2x" style="color: var(--accent-neon); margin-bottom: 10px;"></i>
-                        <h3>Chemistry</h3>
-                    </div>
+            <div style="margin-top: 4rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <div class="tilt-card" style="text-align: center;" data-hover>
+                    <h3 style="color: var(--neon-cyan)">MATH</h3>
+                    <div style="width: 100%; background: #333; height: 4px; margin-top: 10px;"><div style="width: 98%; background: var(--neon-cyan); height: 100%;"></div></div>
                 </div>
-            </div>
-        </section>
-
-        <section id="projects" class="page-section">
-            <div class="panel project-card">
-                <div>
-                    <h2><i class="fas fa-leaf"></i> IoT Smart Agriculture System</h2>
-                    <p class="text-purple" style="font-weight: 600;">Automatic Plant Watering Gadget</p>
-                    <div class="tech-stack">
-                        <span class="tech-pill">NodeMCU ESP8266</span>
-                        <span class="tech-pill">Capacitive Soil Sensor v2.0</span>
-                        <span class="tech-pill">2-Channel Relay</span>
-                        <span class="tech-pill">LCD I2C 1602</span>
-                        <span class="tech-pill">SinricPro IoT</span>
-                        <span class="tech-pill">Alexa Enabled</span>
-                    </div>
-                    <p>Designed to assist farmers and busy individuals, this system intelligently manages plant hydration. It utilizes a capacitive soil moisture sensor to read ADC values, determining soil dryness.</p>
-                    <ul style="margin-top: 1rem; margin-left: 1.5rem; color: var(--text-muted);">
-                        <li style="margin-bottom: 0.5rem;"><strong>Auto Mode:</strong> Automatically triggers the submersible pump via relay when soil is dry based on sensor thresholds.</li>
-                        <li><strong>Manual/Voice Mode:</strong> Full pump control via the SinricPro mobile app or voice commands through Alexa integration.</li>
-                    </ul>
+                <div class="tilt-card" style="text-align: center;" data-hover>
+                    <h3 style="color: var(--neon-green)">CHEMISTRY</h3>
+                    <div style="width: 100%; background: #333; height: 4px; margin-top: 10px;"><div style="width: 95%; background: var(--neon-green); height: 100%;"></div></div>
                 </div>
-                <div class="project-img">
-                    <img src="https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" alt="IoT Plant Watering">
-                </div>
-            </div>
-
-            <div class="panel project-card">
-                 <div>
-                    <h2><i class="fas fa-car"></i> Multilevel Smart Parking System</h2>
-                    <p class="text-purple" style="font-weight: 600;">Urban Infrastructure Solution</p>
-                    <div class="tech-stack">
-                        <span class="tech-pill">ESP32 Controller</span>
-                        <span class="tech-pill">8x IR Sensors</span>
-                        <span class="tech-pill">SG90 Servo Barrier</span>
-                        <span class="tech-pill">LCD I2C 20x4</span>
-                        <span class="tech-pill">Active Buzzer</span>
-                    </div>
-                    <p>Address urban parking scarcity and fuel wastage. This 6-slot system provides real-time visual feedback of empty slots on a large 20x4 LCD display.</p>
-                    <ul style="margin-top: 1rem; margin-left: 1.5rem; color: var(--text-muted);">
-                        <li style="margin-bottom: 0.5rem;"><strong>Automated Entry/Exit:</strong> Two IR sensors control the SG90 servo boom barrier. The barrier locks if all slots are full.</li>
-                        <li><strong>Slot Detection:</strong> Six individual IR sensors monitor occupancy for each parking bay.</li>
-                        <li><strong>Audio Feedback:</strong> Buzzer alerts for entry, exit, and "Parking Full" status.</li>
-                    </ul>
-                </div>
-                <div class="project-img">
-                    <img src="https://plus.unsplash.com/premium_photo-1682147309553-49fbda22c61a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" alt="Smart Parking">
+                <div class="tilt-card" style="text-align: center;" data-hover>
+                    <h3 style="color: var(--neon-purple)">COMPUTERS</h3>
+                    <div style="width: 100%; background: #333; height: 4px; margin-top: 10px;"><div style="width: 99%; background: var(--neon-purple); height: 100%;"></div></div>
                 </div>
             </div>
         </section>
 
-        <section id="academics" class="page-section">
-            <div class="panel">
-                <h2><i class="fas fa-trophy"></i> SOF Olympiad Trajectory</h2>
-                <p style="margin-bottom: 2rem;">A consistent record of excellence in National and International Science, Mathematics, and Cyber Olympiads.</p>
-                
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-grade">Class 1st & 2nd</div>
-                        <div class="timeline-content">
-                            <strong>Gold Medals:</strong> IMO (International Mathematics Olympiad), NSO (National Science Olympiad) - Level 1.
+        <section id="projects" class="page">
+            <h2 style="font-family: 'Orbitron'; margin-bottom: 2rem;">// DEPLOYED_PROJECTS</h2>
+            
+            <div class="card-grid">
+                <div class="tilt-card" data-hover>
+                    <div class="tilt-content">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <h3 style="color: var(--neon-green)">Smart Plant System</h3>
+                            <i class="fas fa-leaf fa-2x" style="color: var(--neon-green)"></i>
+                        </div>
+                        <p style="margin: 1rem 0; color: #bbb;">IoT gadget for farmers using NodeMCU. Features Auto-Watering via Capacitive Soil Sensor v2.0 and manual App control.</p>
+                        <div style="margin-bottom: 1rem;">
+                            <span class="tech-tag">NodeMCU</span>
+                            <span class="tech-tag">SinricPro</span>
+                            <span class="tech-tag">Alexa API</span>
+                            <span class="tech-tag">Relay Module</span>
+                        </div>
+                        <div style="padding: 10px; background: rgba(0,255,0,0.1); border-left: 3px solid var(--neon-green);">
+                            <small>STATUS: <i class="fas fa-circle" style="font-size: 8px;"></i> ONLINE</small>
                         </div>
                     </div>
-                    <div class="timeline-item">
-                        <div class="timeline-grade">Class 3rd</div>
-                        <div class="timeline-content">
-                            <strong>Gold Medals:</strong> IMO, NSO - First Level.
+                </div>
+
+                <div class="tilt-card" data-hover>
+                    <div class="tilt-content">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <h3 style="color: var(--neon-cyan)">Smart Parking Infrastructure</h3>
+                            <i class="fas fa-car fa-2x" style="color: var(--neon-cyan)"></i>
                         </div>
-                    </div>
-                     <div class="timeline-item">
-                        <div class="timeline-grade">Class 4th</div>
-                        <div class="timeline-content">
-                            <strong>Quadruple Gold:</strong> IMO, NSO, NCO (National Cyber Olympiad), and IEO (English Olympiad).
+                        <p style="margin: 1rem 0; color: #bbb;">Multilevel parking solution to save fuel/time. 6-Slot monitoring system with IR Sensors and Servo Boom Barrier.</p>
+                        <div style="margin-bottom: 1rem;">
+                            <span class="tech-tag">ESP32</span>
+                            <span class="tech-tag">8x IR Sensors</span>
+                            <span class="tech-tag">Servo SG90</span>
+                            <span class="tech-tag">LCD 20x4</span>
                         </div>
-                    </div>
-                     <div class="timeline-item">
-                        <div class="timeline-grade">Class 5th (International Rank)</div>
-                        <div class="timeline-content">
-                            <strong>Gold Medals:</strong> IMO and NSO.<br>
-                            <strong><i class="fas fa-globe-americas text-purple"></i> International 5th Rank:</strong> ICSO (International Company Secretaries Olympiad).
-                        </div>
-                    </div>
-                     <div class="timeline-item">
-                        <div class="timeline-grade">Class 6th</div>
-                        <div class="timeline-content">
-                            <strong>Gold Medals:</strong> NSO and IMO.
+                        <div style="padding: 10px; background: rgba(0,243,255,0.1); border-left: 3px solid var(--neon-cyan);">
+                            <small>IMPACT: URBAN OPTIMIZATION</small>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="contact" class="page-section">
-            <div class="panel" style="text-align: center;">
-                <h1>Establish Connection</h1>
-                <p style="margin-bottom: 2rem;">Reach out for collaborations on IoT projects or academic inquiries.</p>
-
-                <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 3rem;">
-                    <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 16px; border: 1px solid var(--accent-neon); min-width: 250px;">
-                        <i class="fas fa-phone-alt fa-2x" style="color: var(--accent-neon); margin-bottom: 1rem;"></i>
-                        <h4>Mobile Link</h4>
-                        <p>+91 95555 71309</p>
+        <section id="achievements" class="page">
+            <h2 style="font-family: 'Orbitron'; margin-bottom: 2rem;">// ACADEMIC_LOGS</h2>
+            
+            <div class="tilt-card" style="max-width: 800px; margin: 0 auto;">
+                <div class="timeline-box">
+                    <div class="timeline-entry">
+                        <h3 style="color: var(--neon-purple)">GRADE 6</h3>
+                        <p>Gold Medal in NSO (National Science Olympiad) & IMO (Maths).</p>
                     </div>
-                    <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 16px; border: 1px solid var(--accent-purple); min-width: 250px;">
-                        <i class="fas fa-envelope fa-2x" style="color: var(--accent-purple); margin-bottom: 1rem;"></i>
-                        <h4>Electronic Mail</h4>
-                        <p>tejas.blynk@gmail.com</p>
+                    <div class="timeline-entry">
+                        <h3 style="color: var(--neon-purple)">GRADE 5 - INTERNATIONAL RANK</h3>
+                        <p><strong>International 5th Rank</strong> in ICSO.</p>
+                        <p>Gold in IMO & NSO.</p>
+                    </div>
+                    <div class="timeline-entry">
+                        <h3 style="color: white)">GRADE 4 - QUADRUPLE GOLD</h3>
+                        <p>Gold in IMO, NSO, NCO (Cyber), and IEO (English).</p>
+                    </div>
+                    <div class="timeline-entry">
+                        <h3 style="color: #888">EARLY YEARS (GR 1-3)</h3>
+                        <p>Consistent Gold Medals in IMO & NSO Level 1.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="page">
+            <div style="text-align: center; margin-top: 3rem;">
+                <h2 style="font-family: 'Orbitron'; font-size: 3rem;">ESTABLISH LINK</h2>
+                <p style="color: #888; margin-bottom: 3rem;">Initiate communication protocol.</p>
+
+                <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+                    <div class="tilt-card" style="min-width: 300px;" data-hover>
+                        <i class="fas fa-phone fa-2x" style="color: var(--neon-green)"></i>
+                        <h3 style="margin: 1rem 0;">+91 95555 71309</h3>
+                    </div>
+                    <div class="tilt-card" style="min-width: 300px;" data-hover>
+                        <i class="fas fa-envelope fa-2x" style="color: var(--neon-purple)"></i>
+                        <h3 style="margin: 1rem 0;">tejas.blynk@gmail.com</h3>
                     </div>
                 </div>
 
-                <div class="panel" style="background: rgba(0,0,0,0.3);">
-                    <h2><i class="fas fa-map-marked-alt"></i> Base Location</h2>
-                    <p style="margin-bottom: 1.5rem;">FJ4P+764 C-16 Type 4, Faculty Residence Rd, BIET Campus, Jhansi, Uttar Pradesh 284128</p>
+                <div class="tilt-card" style="margin-top: 3rem; background: rgba(0,0,0,0.8);" data-hover>
+                    <i class="fas fa-satellite-dish fa-2x" style="color: var(--neon-cyan)"></i>
+                    <h3 style="margin-top: 1rem;">TARGET COORDINATES</h3>
+                    <p style="font-family: 'JetBrains Mono'; color: var(--neon-cyan);">25.455871, 78.635468</p>
+                    <p style="margin-bottom: 1rem; color: #888;">FJ4P+764 Faculty Residence Rd, BIET Campus, Jhansi</p>
                     
-                    <a href="https://www.google.com/maps/search/?api=1&query=25.455871349817613,78.63546875323021" target="_blank" class="map-btn">
-                        <i class="fas fa-satellite-dish"></i> Open Live Coordinates via Google Maps
+                    <a href="https://www.google.com/maps/search/?api=1&query=25.455871349817613,78.63546875323021" target="_blank" class="cyber-btn">
+                        <i class="fas fa-map-marker-alt"></i> LAUNCH SATELLITE MAP
                     </a>
                 </div>
             </div>
         </section>
 
-    </main>
+    </div>
 
     <script>
-        function switchPage(pageId) {
-            const mainContainer = document.getElementById('main-container');
-            const sections = document.querySelectorAll('.page-section');
-            const navBtns = document.querySelectorAll('.nav-btn');
+        // --- 1. Custom Cursor Logic ---
+        const cursor = document.getElementById('cursor');
+        const hoverElements = document.querySelectorAll('[data-hover]');
 
-            // Trigger Glitch Effect
-            mainContainer.classList.add('glitch-active');
-            setTimeout(() => {
-                mainContainer.classList.remove('glitch-active');
-            }, 300);
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
 
-            // Update Active State
-            sections.forEach(sec => sec.classList.remove('active'));
-            navBtns.forEach(btn => btn.classList.remove('active'));
+        hoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
 
-            document.getElementById(pageId).classList.add('active');
+        // --- 2. Particle Background System ---
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if(this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if(this.y > canvas.height || this.y < 0) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(0, 243, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for(let i=0; i<80; i++) particles.push(new Particle());
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for(let i=0; i<particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                // Connect particles
+                for(let j=i; j<particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx*dx + dy*dy);
+                    if(distance < 100) {
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${0.1 - distance/1000})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // --- 3. 3D Tilt Logic ---
+        document.querySelectorAll('.tilt-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg rotation
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) rotateX(0) rotateY(0)`;
+            });
+        });
+
+        // Profile Picture specific Tilt
+        const profileContainer = document.getElementById('profile-container');
+        const profileCard = document.getElementById('profile-card');
+        
+        profileContainer.addEventListener('mousemove', (e) => {
+            const rect = profileContainer.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            profileCard.style.transform = `rotateY(${x * 30}deg) rotateX(${y * -30}deg)`;
+        });
+        profileContainer.addEventListener('mouseleave', () => {
+            profileCard.style.transform = `rotateY(0) rotateX(0)`;
+        });
+
+        // --- 4. Typing Effect ---
+        const text = "IoT Developer | Musician | Coder";
+        const typeWriterElement = document.getElementById('typewriter');
+        let i = 0;
+        function typeWriter() {
+            if (i < text.length) {
+                typeWriterElement.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+        setTimeout(typeWriter, 1000);
+
+        // --- 5. Tab Switching ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
             
-            // Simple way to highlight the correct nav button based on order
-            const btnMap = { 'home': 0, 'projects': 1, 'academics': 2, 'contact': 3 };
-            navBtns[btnMap[pageId]].classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
         }
     </script>
 </body>
