@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap');
+
+:root {
+  --neon: #00fff7;
+  --pink: #ff2fd3;
+  --bg: #05070c;
+  --glass: rgba(255,255,255,0.05);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Orbitron", sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top, #0b1020, #05070c 70%);
+  color: #eaffff;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: opacity .25s ease;
+}
+
+#bg3d {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+/* Loader */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: #05070c;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+}
+
+.boot h2 {
+  color: var(--neon);
+  text-shadow: 0 0 20px var(--neon);
+  text-align: center;
+}
+
+.bar {
+  width: 260px;
+  height: 6px;
+  border: 1px solid var(--neon);
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--neon), var(--pink));
+  animation: load 1.6s forwards;
+}
+
+@keyframes load {
+  to { width: 100%; }
+}
+
+/* Navigation */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 70px;
+  backdrop-filter: blur(12px);
+  background: rgba(5,7,12,0.7);
+  border-bottom: 1px solid rgba(0,255,247,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  z-index: 1000;
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--neon);
+  text-shadow: 0 0 12px var(--neon);
+}
+
+.nav-links a {
+  color: #caffff;
+  text-decoration: none;
+  margin-left: 25px;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--neon), var(--pink));
+  transition: 0.3s;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+/* Layout */
+main {
+  padding-top: 120px;
+  padding-left: 8vw;
+  padding-right: 8vw;
+}
+
+.hero {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.1;
+  background: linear-gradient(90deg, var(--neon), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+  margin-top: 20px;
+  max-width: 600px;
+  color: #bff;
+  opacity: 0.85;
+}
+
+/* Effects */
+.glow-box {
+  background: var(--glass);
+  border: 1px solid rgba(0,255,247,0.25);
+  border-radius: 14px;
+  padding: 30px;
+  box-shadow:
+    0 0 20px rgba(0,255,247,0.15),
+    inset 0 0 20px rgba(255,255,255,0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 14px 28px;
+  border: 1px solid var(--neon);
+  color: var(--neon);
+  text-decoration: none;
+  letter-spacing: 1px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+.cyber-btn:hover {
+  background: var(--neon);
+  color: #05070c;
+  box-shadow: 0 0 25px var(--neon);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+  margin-top: 60px;
+}
+
+.card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,255,247,0.2);
+  padding: 25px;
+  border-radius: 16px;
+  transition: 0.4s;
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 0 35px rgba(0,255,247,0.25);
+}
+
+.card h3 {
+  color: var(--neon);
+  margin-bottom: 10px;
+}
+
+/* Reveal animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: 1s cubic-bezier(.2,.8,.2,1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Chat */
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 12px;
+  max-width: 80%;
+  margin: 6px 0;
+  animation: fadeIn 0.4s ease;
+}
+
+.chat-ai {
+  background: rgba(0,255,247,0.1);
+  border: 1px solid rgba(0,255,247,0.3);
+  color: #00fff7;
+}
+
+.chat-user {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  margin-left: auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
