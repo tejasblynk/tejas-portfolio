@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "version": "1.0",
+    "owner": "Tejas",
+    "description": "Expanded local knowledge base for Tejas AI"
+  },
+
+  "documents": [
+    {
+      "id": "doc-bio",
+      "title": "Tejas – Bio",
+      "summary": "Short biography and core interests.",
+      "content": "Tejas is a student innovator focused on Artificial Intelligence, Robotics, and futuristic systems. He builds projects like AI calculators, smart glasses concepts, robotics systems, and IoT automation. Skills include Python, JavaScript, C++, ESPHome, CAD, and problem solving.",
+      "tags": ["bio", "about", "tejas"],
+      "keywords": ["tejas", "about", "who is tejas", "creator", "owner"],
+      "source": "about.html"
+    },
+
+    {
+      "id": "doc-ai",
+      "title": "Artificial Intelligence",
+      "summary": "What AI is and how it is used.",
+      "content": "Artificial Intelligence is the field of creating machines that can think, learn, and adapt. It includes machine learning, deep learning, and neural networks. AI is used in vision, language processing, robotics, healthcare, and automation.",
+      "tags": ["ai", "ml"],
+      "keywords": ["ai", "artificial intelligence", "machine learning", "neural network"],
+      "source": "notes/ai"
+    },
+
+    {
+      "id": "doc-robotics",
+      "title": "Robotics",
+      "summary": "Basics of robotics and autonomous systems.",
+      "content": "Robotics combines mechanics, electronics, and software to create machines that sense, think, and act. Robots use sensors, motors, controllers, and algorithms for navigation, decision-making, and automation.",
+      "tags": ["robotics"],
+      "keywords": ["robot", "robotics", "machine", "autonomous"],
+      "source": "notes/robotics"
+    },
+
+    {
+      "id": "doc-esphome",
+      "title": "ESPHome & IoT",
+      "summary": "Smart devices and automation.",
+      "content": "ESPHome is used to create smart IoT devices using ESP microcontrollers. It supports sensors, Wi-Fi, OTA updates, MQTT, and automation rules. It is perfect for smart homes and experiments.",
+      "tags": ["iot", "esphome"],
+      "keywords": ["esp", "esphome", "iot", "smart device", "automation"],
+      "source": "projects/esphome"
+    },
+
+    {
+      "id": "doc-math",
+      "title": "Mathematics Engine",
+      "summary": "Math rules and problem solving.",
+      "content": "Mathematics includes arithmetic, algebra, geometry, calculus, and probability. 0! is defined as 1. GCD is the greatest common divisor. LCM is the least common multiple. Mean is average, median is middle, and mode is most frequent.",
+      "tags": ["math"],
+      "keywords": ["math", "calculate", "solve", "gcd", "lcm", "mean", "median", "mode"],
+      "source": "labs.html"
+    }
+  ],
+
+  "qna": [
+    {
+      "id": "q1",
+      "question": "Who is Tejas?",
+      "answer": "Tejas is a student innovator focused on AI, robotics, and futuristic systems.",
+      "keywords": ["who is tejas", "about tejas", "tejas bio"],
+      "source_doc": "doc-bio"
+    },
+    {
+      "id": "q2",
+      "question": "What is AI?",
+      "answer": "Artificial Intelligence is the field of making machines that can think, learn, and adapt.",
+      "keywords": ["what is ai", "define ai", "artificial intelligence"],
+      "source_doc": "doc-ai"
+    },
+    {
+      "id": "q3",
+      "question": "What is robotics?",
+      "answer": "Robotics is the branch of technology that creates machines capable of sensing, thinking, and acting.",
+      "keywords": ["what is robotics", "robotics meaning", "define robot"],
+      "source_doc": "doc-robotics"
+    }
+  ],
+
+  "patterns": [
+    {
+      "id": "p_name",
+      "regex": "my name is\\s+([A-Za-z0-9_\\- ]+)",
+      "intent": "set_name"
+    }
+  ],
+
+  "synonyms": {
+    "hello": ["hello", "hi", "hey", "yo", "sup", "greetings", "good morning", "good evening"],
+    "ai": ["ai", "artificial intelligence", "machine intelligence", "ml", "machine learning", "deep learning", "neural net"],
+    "robot": ["robot", "robots", "robotics", "machine", "bot", "android"],
+    "math": ["math", "mathematics", "calculation", "solve", "compute", "formula"],
+    "project": ["project", "work", "build", "experiment", "system"],
+    "help": ["help", "assist", "guide", "explain", "teach"]
+  }
+}
