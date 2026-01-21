@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tejas AI | Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <!-- Fuse.js for advanced search -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+</head>
+<body>
+
+  <!-- Loader -->
+  <div id="loader">
+    <div class="boot">
+      <h2>TEJAS.AI</h2>
+      <p>Booting AI core...</p>
+      <div class="bar"><span></span></div>
+    </div>
+  </div>
+
+  <!-- 3D Canvas -->
+  <canvas id="bg3d"></canvas>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">TEJAS.AI</div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="projects.html">Projects</a>
+      <a href="labs.html">Labs</a>
+      <a href="ai.html">AI</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    <section class="hero reveal">
+      <h1>Tejas AI</h1>
+      <p>
+        Your intelligent assistant for mathematics, AI, robotics, and this portfolio.
+      </p>
+    </section>
+
+    <section class="glow-box reveal">
+      <div id="chatBox" style="height:320px; overflow-y:auto; margin-bottom:15px;"></div>
+      <input id="userInput"
+             placeholder="Ask me anything..."
+             style="width:100%; padding:12px; background:#05070c; color:#0ff; border:1px solid #0ff;">
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/bg3d.js"></script>
+  <script src="assets/ai/ai-advanced.js"></script>
+
+  <script>
+    const chatBox = document.getElementById("chatBox");
+    const input = document.getElementById("userInput");
+
+    function addBubble(text, type="ai") {
+      const d = document.createElement("div");
+      d.className = `chat-bubble ${type==="ai" ? "chat-ai" : "chat-user"}`;
+      d.textContent = text;
+      chatBox.appendChild(d);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    input.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter" && input.value.trim()) {
+        const q = input.value.trim();
+        addBubble(q, "user");
+        input.value = "";
+        addBubble("…thinking…", "ai");
+
+        const resp = await window.TejasAI.respond(q);
+
+        chatBox.removeChild(chatBox.lastChild);
+        addBubble(resp.text, "ai");
+
+        if (resp.source) {
+          addBubble(`(source: ${resp.source})`, "ai");
+        }
+      }
+    });
+
+    addBubble("Tejas AI online. Ask me about math, AI, robotics, or my creator.", "ai");
+  </script>
+
+</body>
+</html>
